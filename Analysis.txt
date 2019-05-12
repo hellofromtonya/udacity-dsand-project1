@@ -113,7 +113,7 @@ Objectives in this task are to:
 
 ## Time Complexity Summary
 
-The Big O time complexity for Task 0 is O(n).
+The Big O time complexity for Task 1 is O(n).
 
 Worst case:
 
@@ -217,7 +217,7 @@ Objectives in this task are to:
 
 ## Time Complexity Summary
 
-The Big O time complexity for Task 0 is O(n).
+The Big O time complexity for Task 2 is O(n).
 
 Worst case: all phone numbers are unique.
 
@@ -328,7 +328,7 @@ Objectives in this task are to:
 
 ## Time Complexity Summary
 
-The Big O time complexity for Task 0 is O(n log n), which is due to the sort.
+The Big O time complexity for Task 3 is O(n log n), which is due to the sort.
 
 Worst case:
 
@@ -745,7 +745,7 @@ list (not at index 0 or index 1) nor in index 1 of the `calls` list.
 
 ## Time Complexity Summary
 
-The Big O time complexity for Task 0 is O(n log n), which is due to the sort.
+The Big O time complexity for Task 4 is O(n log n), which is due to the sort.
 
 Worst case:
 
