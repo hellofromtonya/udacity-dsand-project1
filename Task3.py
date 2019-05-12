@@ -58,12 +58,8 @@ def is_bangalore(phone_number):
     2. Pattern: (080)xxxxxxx
     """
 
-    # Check each character to determine if the phone number starts with '(080)'.
-    if not (phone_number[0] == '(' and
-            phone_number[1] == '0' and
-            phone_number[2] == '8' and
-            phone_number[3] == '0' and
-            phone_number[4] == ')'):
+    # Check if the phone number starts with '(080)'.
+    if not phone_number[:5] == '(080)':
         return False
 
     # Check that the remainder of the number is numeric.
@@ -80,7 +76,7 @@ def is_fixed_line(phone_number):
     3. Area code starts with 0.
     """
 
-    return phone_number[0] == '(' and phone_number[1] == '0'
+    return phone_number[:2] == '(0'
 
 
 def is_mobile(phone_number):
@@ -113,9 +109,7 @@ def is_telemarketer(phone_number):
     """
 
     # If the number does not start with 140, return False.
-    if not (phone_number[0] == '1' and
-            phone_number[1] == '4' and
-            phone_number[2] == '0'):
+    if not phone_number[:3] == '140':
         return False
 
     # Check that the remainder of the number is numeric.
@@ -147,11 +141,9 @@ def get_mobile_prefix(phone_number):
     Gets the prefix for a mobile phone number.
 
     1. Assumes the given phone number is mobile.
-    2. The prefix is the digits up to the middle space.
-    3. The space divides the phone number into prefix + digits.
+    2. The prefix is the first 4 digits.
     """
-    middle_index = len(phone_number) // 2
-    return phone_number[:middle_index]
+    return phone_number[:4]
 
 
 """
@@ -201,8 +193,11 @@ def get_codes(calls_made):
 
         # If fixed, get area code.
         elif is_fixed_line(phone_number):
-            calls_to_bangalore += 1
             codes.add(get_area_code(phone_number))
+
+            # If it's a call to a Bangalore phone number, increment the count.
+            if is_bangalore(phone_number):
+                calls_to_bangalore += 1
 
     return list(codes)
 
@@ -265,12 +260,20 @@ def run_tests():
     assert(not is_bangalore('1408371942'))
 
     # Test mobile numbers.
-    assert(is_mobile('92421 09526'))
-    assert(not is_fixed_line('92421 09526'))
-    assert(not is_telemarketer('92421 09526'))
-    assert(get_mobile_prefix('92421 09526') == '92421')
+    test_data = {
+        '92421 09526': '9242',
+        '77956 90632': '7795',
+        '74066 93594': '7406',
+        '98453 46196': '9845',
+    }
+    for phone_number, prefix in test_data.items():
+        assert(is_mobile(phone_number))
+        assert(not is_fixed_line(phone_number))
+        assert(not is_telemarketer(phone_number))
+        assert(get_mobile_prefix(phone_number) == prefix)
 
-
+    number_of_calls_made = 0
+    calls_to_bangalore = 0
     test_data = [
         [
             ['(080)67362492', '1408371942', '01-09-2016 06:19:28', '2751'],
@@ -305,12 +308,19 @@ def run_tests():
     ]
     calls_made = get_calls_made_from_bangalore(test_data[0])
     assert(calls_made == expected)
+
     # Test the codes.
     codes = get_codes(calls_made)
     expected = ['140', '080', '74066', '90365', '04344']
     assert(codes.sort() == expected.sort())
 
+    # Test the tracking counts.
+    assert(number_of_calls_made == 5)
+    assert(calls_to_bangalore == 1)
+
     # Test for no duplicates.
+    number_of_calls_made = 0
+    calls_to_bangalore = 0
     expected = [
         '1408371942',
         '(080)43901222',
@@ -330,7 +340,13 @@ def run_tests():
     expected = ['140', '080', '90365', '04344']
     assert(codes.sort() == expected.sort())
 
+    # Test the tracking counts.
+    assert(number_of_calls_made == 8)
+    assert(calls_to_bangalore == 2)
+
+
     print('All tests passed!')
+
 
     # Clean up.
     number_of_calls_made = 0
