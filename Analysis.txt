@@ -313,7 +313,6 @@ Objectives in this task are to:
 4.  I broke out the tasks of (a) getting the calls made from Bangalore and (b) getting the codes from those calls.
     Why? I wanted to test each separately.
 
-
 5.  As we haven't come to the optimization part of the nanodegree yet, I chose to use the builtin `sort()` function, knowing
     this function is O(n log n).  I assume in later projects we'll get to optimize sorting.
 
@@ -667,12 +666,7 @@ N   = O(len(p))
 ### Function: get_mobile_prefix
 
 Description:    This function gets the prefix for the given mobile phone number. It assumes the given input is a mobile
-                phone number.
-
-                The prefix is the first part of the phone number.  It's all the digits up to the space.  The space is at
-                the middle of the phone number.  Therefore, we calculate the middle index for the space.
-
-                Next, we slice the phone number from O to the middle - 1.
+                phone number. The prefix is starts with a 7, 8, or 9 and is the first 4 digits of the given phone number.
 
 Big O:          The Big O time complexity is O(1).
 
@@ -683,18 +677,12 @@ Big O:          The Big O time complexity is O(1).
 
 ```
 def get_mobile_prefix(phone_number):
-    middle_index = len(phone_number) // 2               O(p) len + O(1) math
-    return phone_number[:middle_index]                  O(p / 2) slice
+    return phone_number[:4]                  O(4) slice
 ```
 
-T1  = [O(p) + O(1)] + O(p/2)
-    = O(p) + c1 + O(p/2)
-    = O(p) + O(p/2) <- drop the constants
-    = O(p)
+T1  = O(4)
 
-N   = O(len(p))
-    = O(14) <- worst case
-    = O(1)
+N   = O(1)
 
 
 

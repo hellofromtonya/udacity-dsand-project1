@@ -147,11 +147,9 @@ def get_mobile_prefix(phone_number):
     Gets the prefix for a mobile phone number.
 
     1. Assumes the given phone number is mobile.
-    2. The prefix is the digits up to the middle space.
-    3. The space divides the phone number into prefix + digits.
+    2. The prefix is the first 4 digits.
     """
-    middle_index = len(phone_number) // 2
-    return phone_number[:middle_index]
+    return phone_number[:4]
 
 
 """
@@ -265,10 +263,17 @@ def run_tests():
     assert(not is_bangalore('1408371942'))
 
     # Test mobile numbers.
-    assert(is_mobile('92421 09526'))
-    assert(not is_fixed_line('92421 09526'))
-    assert(not is_telemarketer('92421 09526'))
-    assert(get_mobile_prefix('92421 09526') == '92421')
+    test_data = {
+        '92421 09526': '9242',
+        '77956 90632': '7795',
+        '74066 93594': '7406',
+        '98453 46196': '9845',
+    }
+    for phone_number, prefix in test_data.items():
+        assert(is_mobile(phone_number))
+        assert(not is_fixed_line(phone_number))
+        assert(not is_telemarketer(phone_number))
+        assert(get_mobile_prefix(phone_number) == prefix)
 
 
     test_data = [
