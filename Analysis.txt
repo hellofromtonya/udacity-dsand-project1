@@ -489,10 +489,9 @@ N   = O(n)
 Description:    We know the starting pattern for a Bangalore phone number is '(080)' and the remainder of the phone
                 number are integer.
 
-                Check 1: The first check determines if each character to ensure the phone number starts with '(080)'.
-                I chose to check it character by character instead of using the built-in `startwith()` function.  Why?
-                I know the exact pattern and what each character should contain.  This should be faster than the built-in
-                function which could have to slice or pattern match each character.
+                Check 1: The first check determines if the phone number starts with '(080)'. I chose to slice the first
+                5 characters instead of using the built-in `startwith()` function.  Why? I know the exact pattern and
+                what each character should contain.  This implementation is faster than `startwith()`.
 
                 Check 2: The second check determines if each character starting after the '(080)' is a number.  It uses
                 `isnumeric()` to validate if it's a number.
@@ -507,18 +506,14 @@ Big O:          The Big O time complexity is O(1).
 ```
 def is_bangalore(phone_number):
     # Check each character to determine if the phone number starts with '(080)'.
-    if not (phone_number[0] == '(' and                                              5 x (O(1) get + O(1) compare)
-            phone_number[1] == '0' and
-            phone_number[2] == '8' and
-            phone_number[3] == '0' and
-            phone_number[4] == ')'):
+    if not phone_number[:5] == '(080)':                                             O(5) slice + O(1) compare
         return False                                                                    O(1)
 
     # Check that the remainder of the number is numeric.
     return phone_number[5:].isnumeric()                                             O(p - 5) slice x 2 isnumeric(), where p is len(phone_number)
 ```
 
-T1  = [5 x (O(1) + O(1)] + [O(1) + O(p - 5) x 2]
+T1  = [O(5) + O(1)] + [O(1) + O(p - 5) x 2]
     = c1 + c2 + O(2p - 10)
     = O(2p - 10) <- drop the constants
     = O(p)
@@ -534,12 +529,11 @@ The Big O time complexity is O(1).
 
 ```
 def is_fixed_line(phone_number):
-    return phone_number[0] == '(' and phone_number[1] == '0'                        2 x ( O(1) get + O(1) compare )
+    return phone_number[:2] == '(0'                                                 O(2) slice + O(1) compare
 ```
 Equation:
-T1  = 2 x ( O(1) + O(1) )
-    = 2 x O(2)
-    = O(4)
+T1  = O(2) + O(1)
+    = O(3)
 
 N   = O(1)
 
@@ -589,9 +583,9 @@ N   = O(len(p))
 Description:    A telemarketer phone number starts with a '140' and the remaining characters are numbers.
 
                 Check 1: Checks the first 3 characters against the '140' pattern, i.e. to ensure the phone number
-                starts with '140'.  I chose to check it character by character instead of using the built-in `startwith()`
-                function.  Why? I know the exact pattern and what each character should contain.  This should be faster
-                than the built-in function which could have to slice or pattern match each character.
+                starts with '140'.  I chose to slice the first 3 characters instead of using the built-in `startwith()`
+                function.  Why? I know the exact pattern and what each character should contain.  This implementation
+                is faster than `startwith()`.
 
                 Check 2: Checks if each character starting after the '140' is a number.
 
@@ -605,16 +599,14 @@ Big O:          The Big O time complexity is O(1).
 ```
 def is_telemarketer(phone_number):
     # If the number does not start with 140, return False.
-    if not (phone_number[0] == '1' and                                   3 x (O(1) get + O(1) compare)
-            phone_number[1] == '4' and
-            phone_number[2] == '0'):
+    if not phone_number[:3] == '140':                                   O(3) slice + O(1) compare
         return False                                                        O(1)
 
     # Check that the remainder of the number is numeric.
     return phone_number[3:].isnumeric()                                  O(p - 3) slice x 2 isnumeric(), where p is len(phone_number)
 ```
 
-T1  = [3 x (O(1) + O(1)] + [2 x O(p - 3)]
+T1  = [O(3) + O(1)] + [2 x O(p - 3)]
     = c1 + O(2p - 6)
     = O(2p - 6) <- drop the constants
     = O(p)

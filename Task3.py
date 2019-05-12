@@ -58,12 +58,8 @@ def is_bangalore(phone_number):
     2. Pattern: (080)xxxxxxx
     """
 
-    # Check each character to determine if the phone number starts with '(080)'.
-    if not (phone_number[0] == '(' and
-            phone_number[1] == '0' and
-            phone_number[2] == '8' and
-            phone_number[3] == '0' and
-            phone_number[4] == ')'):
+    # Check if the phone number starts with '(080)'.
+    if not phone_number[:5] == '(080)':
         return False
 
     # Check that the remainder of the number is numeric.
@@ -80,7 +76,7 @@ def is_fixed_line(phone_number):
     3. Area code starts with 0.
     """
 
-    return phone_number[0] == '(' and phone_number[1] == '0'
+    return phone_number[:2] == '(0'
 
 
 def is_mobile(phone_number):
@@ -113,9 +109,7 @@ def is_telemarketer(phone_number):
     """
 
     # If the number does not start with 140, return False.
-    if not (phone_number[0] == '1' and
-            phone_number[1] == '4' and
-            phone_number[2] == '0'):
+    if not phone_number[:3] == '140':
         return False
 
     # Check that the remainder of the number is numeric.
