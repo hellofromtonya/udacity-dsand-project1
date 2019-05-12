@@ -1,0 +1,867 @@
+Name: Tonya Mork
+
+Design Concepts:
+
+* When a centralized container is needed to hold the work, I'll use a global variable to conserve memory
+  and processing.
+* Algorithm will be a separate function, when appropriate.
+* Calls to algorithm(s) done from a `main()` function.
+* Each task will include a test suite comprised of assertions. To run, uncommenting at the bottom of the task.
+* Final task will run `main()` only.
+
+
+============================
+# Task 0
+============================
+
+Objectives in this task are to:
+
+1. Identify the first texts record.
+2. Identify the last calls record.
+3. Populate each given message with the items from the record.
+
+## Design Explanation
+
+1.  The code is held in the `main()` function.  There is no need for a separate algorithm function(s) due to the
+    simplicity of the task.
+
+2.  Each message requires a single record.  As the `texts` and `calls` are lists, the code can use the following indices to
+    get the respective record:
+
+        * `texts[0]` gets the first record
+        * `calls[-1]` gets the last record
+
+3.  I chose to use the native `*` to unpack the items from each record.  Why? I find the implementation more readable
+    with less code to maintain.
+
+
+## Time Complexity Summary
+
+The Big O time complexity for Task 0 is O(1).
+
+Worst case: 1 record to process for each message.
+
+## Analysis
+
+Let's break it down by print statement.
+
+```
+print("First record of texts, {} texts {} at time {}".format(*texts[0]))
+```
+
+O(1) | `texts[0]` is a get, which is O(1)
+O(3) | get 3 items from the record, O(1) x 3 = O(3)
+O(1) | .format
+O(1) | print
+======
+O(6)
+
+```
+print("Last record of calls, {} calls {} at time {}, lasting {} seconds".format(*calls[-1]))
+```
+
+O(1) | `calls[-1]` is a get, which is O(1)
+O(4) | get 4 items from the record, O(1) x 4 = O(4)
+O(1) | .format
+O(1) | print
+======
+O(7)
+
+T1 = texts print
+T2 = calls print
+
+T1 = O(1) + 3 x O(1) + O(1) + O(1)
+   = c1 + 3c2 + c3 + c4
+   = 1 <- drop the constants
+
+T2 = O(1) + 4 x O(1) + O(1) + O(1)
+   = c1 + 4c2 + c3 + c4
+   = 1 <- drop the constants
+
+N = T1 + T2
+  = O(1)
+
+
+============================
+# Task 1
+============================
+
+Objectives in this task are to:
+
+1. Build a container of distinct telephone numbers from all records.
+2. Both `calls` and `lists` have 2 telephone numbers per record.
+3. Print the total number of distinct telephone numbers.
+
+
+## Design Explanation
+
+1.  All code is executed from the `main()` program.
+
+2.  I chose to create the container as a global variable, called `distinct_phone_numbers`. Why? It simplifies the
+    code for working on the texts and then the calls.
+
+3.  I chose to use a set data structure for the container.  Why?
+
+    *   Its native purpose is to hold distinct items.
+    *   It's a hashtable that has mutable methods, such as `add` and `clear`.
+    *   The phone numbers are keys within the set, giving us better performance than a list.  For this task, a list would
+        give us a quadratic time complexity in the worst case, whereas a set gives us a linear time complexity.
+
+4.  Get distinct phone numbers from records:  Each record in records has 2 telephone numbers.  Add each telephone
+    number to the `distinct_phone_numbers` set.
+
+
+## Time Complexity Summary
+
+The Big O time complexity for Task 0 is O(n).
+
+Worst case:
+
+* All phone numbers are unique.
+* In that worst case, there will be (len(calls) + len(texts) x 2) distinct telephone numbers.
+
+
+## Analysis
+
+### `main()`
+
+Description:    This function is the main controller for the task.  It invokes `get_distinct_phone_numbers()` for each
+                of the lists, i.e. `calls` and `texts`, to build a container of distinct phone numbers.  Then it
+                prints the message with the number of distinct phone numbers.
+
+Big O:          The Big O time complexity is O(n).
+
+
+```
+def main():
+    get_distinct_phone_numbers(texts)                           O(n)
+    get_distinct_phone_numbers(calls)                           O(n)
+
+    print("There are {} different telephone numbers in the records.".format(len(distinct_phone_numbers)))  O(1) len + O(1) format + O(1) print
+
+```
+
+T1  = O(n) + O(n) + O(1) + O(1) + O(1)
+    = O(2n) + c1
+    = 2n <- drop constant
+    = n
+
+N   = O(n)
+
+
+### `get_distinct_phone_numbers()`
+
+Description:    Iterate through the 2 phone numbers of each record and add each into the distinct container.  As the
+                the container is a set, it handles excluding duplicates.
+
+Big O:          The Big O time complexity is O(n).
+
+```
+def get_distinct_phone_numbers(records):
+    for record in records:                                      O(n)
+        for i in range(2):                                      O(2)
+            distinct_phone_numbers.add(record[i])                   O(1) get + O(1) .add()
+```
+
+T1  = O(1) + n x ( 2 x ( O(1) + O(1) ) )
+    = n x (2c1 + 2c2)
+    = n x 2c1 + n x 2c2
+    = n + n <- drop the constants
+    = 2n <- drop the constant
+    = n
+
+N   = O(n)
+
+
+============================
+# Task 2
+============================
+
+Objectives in this task are to:
+
+1. Identify the telephone number(s) in `calls` that spent the longest amount of time on the phone.
+2. Print out the telephone number(s) and the total seconds on the phone.
+
+## Design Explanation
+
+1.  Analyzing the `calls` list as it provides the call duration for each record.
+
+2.  Ignoring `texts` list as we don't know the duration, as it's not provided.
+
+3.  It's possible that more than one telephone number could have the longest duration.
+
+4.  All code is executed from the `main()` program.
+
+5.  I created a global container, called `call_durations`, to hold each phone number and its total duration.
+
+6.  The algorithm is in the function called `get_longest_time_on_phone`.  I split it out of the `main()` for isolating
+    tests.
+
+    For this algorithm, I had to consider:
+
+    * Summing the call durations for each phone number
+    * How to handle identifying the longest call durations
+
+    As it iterates through each phone number in each call record, it:
+
+        * adds the duration to the `call_durations` dictionary
+        * compares the call's to the longest duration.
+            * if >:
+                * it sets this call's duration as the new longest duration
+                * adds the phone number into the `phone_numbers` set
+            * if ==:
+                * adds the phone number into the `phone_numbers` set
+
+7.  It returns a tuple with the telephone numbers and total time.
+
+
+## Time Complexity Summary
+
+The Big O time complexity for Task 0 is O(n).
+
+Worst case: all phone numbers are unique.
+
+
+## Analysis
+
+### `main()`
+
+Description:    This function is the main controller for the task.  It invokes `get_longest_time_on_phone`, passing
+                the `calls` list to it.  What is returned is the telephone number(s) and total time for the
+                longest duration on the phone.  As it's possible to have more than one telephone number, it joins
+                the set of telephone numbers and separates each with a `', '`. Then it populates the values into the
+                message and prints it out.
+
+Big O:          The Big O time complexity is O(n).
+
+
+```
+def main():
+    phone_numbers, total_time = get_longest_time_on_phone(calls)                                    O(n)
+    phone_number = ', '.join(phone_numbers)                                                         O(n)
+    print("{} spent the longest time, {} seconds, on the phone during September 2016.".format(phone_number, total_time)) O(2) format args + O(1) print
+```
+
+T1  = O(n) + O(n) + O(2) + O(1)
+    = 2 x O(n) + c1 + c2
+    = n <- drop the constants
+
+N   = O(n)
+
+### `get_longest_time_on_phone()`
+
+Description:    This function is the algorithm.  It iterates through each telephone number in each record, i.e. there
+                are 2 telephone numbers in each record.  It then adds this call's duration to the telephone number's
+                total duration (i.e. tracked in the `call_durations` dictionary).  Then it compares the total time
+                to the previous longest duration time.  If greater, it stores the telephone number and total time.
+                If the same, it adds the telephone number to the collection of telephone numbers for this longest
+                duration time.
+
+Big O:          The Big O time complexity is O(n).
+
+```
+def get_longest_time_on_phone(records):
+    global call_durations
+
+    phone_numbers = set()                                                                           O(1)
+    longest_duration = 0                                                                            O(1)
+
+    for record in records:                                                                          O(n)
+        for i in range(2):                                                                              O(2)
+            phone_number = record[i]                                                                        O(1)
+            duration = int(record[-1])                                                                      O(2) => O(1) get + O(1) type cast to int
+
+            # Add the duration to this phone number.
+            call_durations[phone_number] = call_durations.get(phone_number, 0) + duration                   O(2) => O(1) get + O(1) addition
+
+            # Check if the total duration is the largest.
+            if call_durations[phone_number] > longest_duration:                                             O(2) => O(1) get + O(1) for comparison
+                longest_duration = call_durations[phone_number]                                                 O(1) get
+                phone_numbers = {phone_number}                                                                  O(1)
+            elif call_durations[phone_number] == longest_duration:                                          O(2) => O(1) get + O(1) for comparison
+                phone_numbers.add(phone_number)                                                                 O(1)
+
+    return phone_numbers, longest_duration                                                          O(1)
+```
+
+T1  = O(1) + O(1) + O(1) + n x ( 2 x ( O(1) + O(2) + O(2) + O(2) + O(1) + O(1) ) )
+    = c1 + c2 + c3 + n x (2 x (c4 + c5 + c6 + c7 + c8 + c9))
+    = c10 + n x 2c11
+    = O(n) <- drop the constants
+
+N   = O(n)
+
+============================
+# Task 3
+============================
+
+Objectives in this task are to:
+
+1. Get the area codes and mobile prefixes of all calls made from Bangalore.
+2. Compute the percentage of calls made (a) to Bangalore fixed lines (b) from Bangalore fixed lines: a / b * 100 = %
+
+## Design Explanation
+
+1.  All code is executed from the `main()` program.
+
+2.  Phone type checkers:  There are 3 different types of phone numbers in the records, each with a distinct pattern.
+    I broke up the patterns into 3 different checkers, i.e. `is_[type]`, to make the code more readable and isolate testing.
+
+3.  Get codes from the 3 phone types:  I broke out the fixed line and mobile prefix into separate functions to improve
+    readability and isolate testing.  As the telemarketer phone number always has a code of 140, I hard coded its logic.
+
+4.  I broke out the tasks of (a) getting the calls made from Bangalore and (b) getting the codes from those calls.
+    Why? I wanted to test each separately.
+
+
+5.  As we haven't come to the optimization part of the nanodegree yet, I chose to use the builtin `sort()` function, knowing
+    this function is O(n log n).  I assume in later projects we'll get to optimize sorting.
+
+6.  A significant amount of the work is done at the character level of a phone number.  I represent the number of
+    characters in a phone number as `p` and set an assumption that the maximum length is 14.
+
+7.  This algorithm only runs the `calls` list and not `texts` list.  Why?  The `texts` lists does not include duration
+    nor the text message.  There's not a way to estimate or assume the time on the phone in typing out or reading a text.
+
+8.  I chose to add (2) global variables to track the `number_of_calls_made` and `calls_to_bangalore` totals. Why?  It
+    simplifies the code by allowing counts to occur within each primary algorithm.
+
+
+## Time Complexity Summary
+
+The Big O time complexity for Task 0 is O(n log n), which is due to the sort.
+
+Worst case:
+
+* All phone numbers are unique.
+* Phone number has 14 characters in it.
+
+Primary Functions:
+
+| N          | Function                       |
+|------------|--------------------------------|
+| O(n)       | get_calls_made_from_bangalore  |
+| O(n)       | get_codes                      |
+| O(n log n) | main                           |
+
+Helper Functions:
+
+| N          | Function                       |
+|------------|--------------------------------|
+| O(1)       | is_bangalore                   |
+| O(1)       | is_fixed_line                  |
+| O(1)       | is_mobile                      |
+| O(1)       | is_telemarketer                |
+| O(1)       | get_area_code                  |
+| O(1)       | get_mobile_prefix              |
+
+
+## Optimization
+
+This task can be reduced to a linear time complexity if the sorting algorithm is implemented as a MSD radix sort or
+a burstsort using a Trie data structure.
+
+
+## Analysis
+
+p represents the number of characters in the phone number (len(phone_number)).  Worst case p = 14.
+
+
+### `main()`
+
+Description:    This function is the main controller for the task.  It gets the area codes and mobile prefixes from calls
+                made from Bangalore by invoking the 2 primary functions.  Then it sorts the codes and prints each out
+                to complete Task A. Then it calculates the percentage of calls and prints it out to complete Task B.
+
+Big O:          The Big O time complexity is O(n log n), which is due to the sort.
+
+```
+def main():
+    calls_made = get_calls_made_from_bangalore(calls)                               O(n)
+    codes = get_codes(calls_made)                                                   O(n)
+
+
+    # Task A:
+    codes.sort()                                                                    O(n log n)
+    print("The numbers called by people in Bangalore have codes:")                  O(1)
+    for code in codes:                                                              O(n)
+        print(code)                                                                     O(1)
+
+    # Task B:
+    percentage_of_calls = round((calls_to_bangalore / number_of_calls_made) * 100, 2)   O(1) math + O(1) round
+    print("....".format(str(percentage_of_calls)))                                      O(1) format + O(1) print
+
+```
+
+T1  = [O(n) + O(n)] + O(n log n) + [O(1) + n x O(1)] + [O(1) + O(1) + O(1) + O(1)]
+    = c1 + O(n log n) + c3 + c4
+    = O(n log n) <- drop the constants
+
+N   = O(n log n)
+
+
+### Primary Function: get_calls_made_from_bangalore
+
+Description:    This function iterates through all of the given call records to collect the called phone numbers made
+                by people in Bangalore. Index 0 in the call record is the caller phone number (i.e. calling from) and
+                index 1 is the called (i.e. calling to) phone number. The function only processes caller phone numbers
+                that are in Bangalore.  For each found, it captures the called phone number in a list.
+
+Big O:          The Big O time complexity is O(n).
+
+```
+def get_calls_made_from_bangalore(records):
+    calls_made = []
+
+    for record in records:                                                O(n)
+        if not is_bangalore(record[0]):                                     O(1) get + O(1) is_bangalore + O(1) conditional
+            continue                                                            O(1)
+
+        number_of_calls_made += 1                                           O(1)
+
+        calls_made.append(record[1])                                        O(1) get + O(1) append
+
+    return calls_made                                                   O(1)
+```
+
+T1 = [O(1)] + [O(n) x [O(1) + O(1) + O(1) + O(1) + O(1)]] + [O(1)]
+  = c1 + n x c2 + c3
+  = n x c2 <- drop the constants
+  = n
+
+N = O(n)
+
+
+### Primary Function: get_codes
+
+Description:    This function iterates through all of the called phone numbers to extract the area code or mobile
+                prefix of each phone number.  There are 3 different types of phone numbers:  telemarketers, mobile,
+                and fixed line.  This algorithm identifies the phone number type and then extracts the code per that
+                type.  If the phone number is from a fixed line, it also increments the global variable
+                `calls_to_bangalore`.
+
+                For the telemarketer, it has an area code of 140.  Since we don't want duplicate codes, we can include
+                this code once and hard code it (i.e. no need to extract the area code).  The variable `has_telemarketer`
+                ensures it only runs once.
+
+                I chose a set data type to reduce the time complexity and ensure no duplicates are captured. Huh?
+                `add()` of a set is O(1).  The other way to do this is to use a list data type and search the list
+                before appending. But that time complexity would result in O(n^2).
+
+Big O:          The Big O time complexity is O(n).
+
+```
+def get_codes(calls_made):
+    codes = set()                                                           O(1)
+    has_telemarketer = False                                                O(1)
+
+    for phone_number in calls_made:                                         O(n)
+
+        # If telemarketer, set the area code to '140'.
+        if is_telemarketer(phone_number) and not has_telemarketer:              O(1) is_telemarketer + O(1) compare
+            codes.add('140')                                                        O(1)
+            has_telemarketer = True                                                 O(1)
+
+        # If mobile, get prefix.
+        elif is_mobile(phone_number):                                           O(1) is_mobile
+            codes.add(get_mobile_prefix(phone_number))                              O(1) get_mobile_prefix + O(1) add
+
+        # If fixed, get area code.
+        elif is_fixed_line(phone_number):                                       O(1) is_fixed_line
+            calls_to_bangalore += 1                                                 O(1)
+            codes.add(get_area_code(phone_number))                                  O(1) get_area_code + O(1) add
+
+    return list(codes)                                                      O(n)
+```
+
+T1  = [O(1) + O(1) + O(1)] + n x [ [O(1) + O(1)] + [O(1)] + [O(1) + O(1) + O(1) + O(1)] ]
+    = c1 + n x [ c2 + c3 + c4 ]
+    = c1 + n x c5
+    = n <- drop the constants
+
+N   = O(n)
+
+
+### Function: is_bangalore
+
+Description:    We know the starting pattern for a Bangalore phone number is '(080)' and the remainder of the phone
+                number are integer.
+
+                Check 1: The first check determines if each character to ensure the phone number starts with '(080)'.
+                I chose to check it character by character instead of using the built-in `startwith()` function.  Why?
+                I know the exact pattern and what each character should contain.  This should be faster than the built-in
+                function which could have to slice or pattern match each character.
+
+                Check 2: The second check determines if each character starting after the '(080)' is a number.  It uses
+                `isnumeric()` to validate if it's a number.
+
+Big O:          The Big O time complexity is O(1).
+
+                This function has a time complexity of O(len(p)), where p is the number of characters in the phone
+                number, i.e. string length. If the worst case is 14 characters in a phone number, then O(len(p)) = O(14) = O(1).
+                Another way to look at it is: the function's time complexity is based upon the input, which is 1 input
+                with a string length of 14.
+
+```
+def is_bangalore(phone_number):
+    # Check each character to determine if the phone number starts with '(080)'.
+    if not (phone_number[0] == '(' and                                              5 x (O(1) get + O(1) compare)
+            phone_number[1] == '0' and
+            phone_number[2] == '8' and
+            phone_number[3] == '0' and
+            phone_number[4] == ')'):
+        return False                                                                    O(1)
+
+    # Check that the remainder of the number is numeric.
+    return phone_number[5:].isnumeric()                                             O(p - 5) slice x 2 isnumeric(), where p is len(phone_number)
+```
+
+T1  = [5 x (O(1) + O(1)] + [O(1) + O(p - 5) x 2]
+    = c1 + c2 + O(2p - 10)
+    = O(2p - 10) <- drop the constants
+    = O(p)
+
+N   = O(len(p))
+    = O(14) <- worst case
+    = O(1)
+
+
+### Function: is_fixed_line
+
+The Big O time complexity is O(1).
+
+```
+def is_fixed_line(phone_number):
+    return phone_number[0] == '(' and phone_number[1] == '0'                        2 x ( O(1) get + O(1) compare )
+```
+Equation:
+T1  = 2 x ( O(1) + O(1) )
+    = 2 x O(2)
+    = O(4)
+
+N   = O(1)
+
+
+### Function: is_mobile
+
+Description:    A mobile phone number starts with either a 7, 8, or 9 and has a space in the middle of the phone number.
+
+                Check 1: Checks the first character to determine if it is a 7, 8, or 9. If no, it returns `False`; else,
+                it goes to the next check.
+
+                Check 2: Calculates the middle of the phone number.  Uses that middle as an index to check if the
+                character at the middle is a space.
+
+Big O:          The Big O time complexity is O(1).
+
+                This function has a time complexity of O(len(p)), where p is the number of characters in the phone
+                number, i.e. string length. If the worst case is 14 characters in a phone number, then O(len(p)) = O(14) = O(1).
+                Another way to look at it is: the function's time complexity is based upon the input, which is 1 input
+                with a string length of 14.
+
+
+```
+def is_mobile(phone_number):
+    # Checks if the phone number starts with a 7, 8, or 9.
+    if not (phone_number[0] == '7' or                                   3 x (O(1) get + O(1) compare)
+            phone_number[0] == '8' or
+            phone_number[0] == '9'):
+        return False                                                        O(1)
+
+    # Checks if the middle character is a space.
+    middle_index = len(phone_number) // 2                               O(p) len + O(1) //
+    return phone_number[middle_index] == ' '                            O(1) get + O(1) comparison
+```
+
+T1  = [3 x (O(1) + O(1))] + [O(p) + O(1)] + [O(1) + O(1)]
+    = c1 + O(p) + c2 + c3
+    = O(p) <- drop the constants
+
+N   = O(len(p))
+    = O(14) <- worst case
+    = O(1)
+
+
+### Function: is_telemarketer
+
+Description:    A telemarketer phone number starts with a '140' and the remaining characters are numbers.
+
+                Check 1: Checks the first 3 characters against the '140' pattern, i.e. to ensure the phone number
+                starts with '140'.  I chose to check it character by character instead of using the built-in `startwith()`
+                function.  Why? I know the exact pattern and what each character should contain.  This should be faster
+                than the built-in function which could have to slice or pattern match each character.
+
+                Check 2: Checks if each character starting after the '140' is a number.
+
+Big O:          The Big O time complexity is O(1).
+
+                This function has a time complexity of O(len(p)), where p is the number of characters in the phone
+                number, i.e. string length. If the worst case is 14 characters in a phone number, then O(len(p)) = O(14) = O(1).
+                Another way to look at it is: the function's time complexity is based upon the input, which is 1 input
+                with a string length of 14.
+
+```
+def is_telemarketer(phone_number):
+    # If the number does not start with 140, return False.
+    if not (phone_number[0] == '1' and                                   3 x (O(1) get + O(1) compare)
+            phone_number[1] == '4' and
+            phone_number[2] == '0'):
+        return False                                                        O(1)
+
+    # Check that the remainder of the number is numeric.
+    return phone_number[3:].isnumeric()                                  O(p - 3) slice x 2 isnumeric(), where p is len(phone_number)
+```
+
+T1  = [3 x (O(1) + O(1)] + [2 x O(p - 3)]
+    = c1 + O(2p - 6)
+    = O(2p - 6) <- drop the constants
+    = O(p)
+
+N   = O(len(p))
+    = O(14) <- worst case
+    = O(1)
+
+
+### Function: get_area_code
+
+Description:    This function gets the area code of a fixed line phone number.  It assumes the phone number given is
+                fixed line.
+
+                We know that a fixed line phone number has an area code wrapped inside of parentheses and it starts with
+                a 0.  That means the first 2 characters are '(0'.  We can then start our character loop at 2 until it
+                hits the closing ')'.
+
+                In each iteration, it appends the character to the code until it hits ')'.
+
+Big O:          The Big O time complexity is O(1).
+
+                This function has a time complexity of O(len(p)), where p is the number of characters in the phone
+                number, i.e. string length. If the worst case is 14 characters in a phone number, then O(len(p)) = O(14) = O(1).
+                Another way to look at it is: the function's time complexity is based upon the input, which is 1 input
+                with a string length of 14.
+
+```
+def get_area_code(phone_number):
+    code = '0'                                                          O(1)
+
+    # Starts at character 2 to the end of the phone number.
+    for i in range(2, len(phone_number)):                               O(p - 2)
+        # Bail out as soon as we hit the end of the area code.
+        if phone_number[i] == ')':                                          O(1) get + O(1) compare
+            break                                                               O(1)
+        code += phone_number[i]                                             O(1) get + O(1) increment
+
+    return code                                                         O(1)
+```
+
+T1  = [O(1)] + [O(p-2) x [(O(1) + O(1)] + [O(1) + O(1)]] + [O(1)]
+    = c1 + O(p-2) x c2 + c3
+    = O(p - 2) <- drop the constants
+    = O(p)
+
+N   = O(len(p))
+    = O(14) <- worst case
+    = O(1)
+
+
+### Function: get_mobile_prefix
+
+Description:    This function gets the prefix for the given mobile phone number. It assumes the given input is a mobile
+                phone number.
+
+                The prefix is the first part of the phone number.  It's all the digits up to the space.  The space is at
+                the middle of the phone number.  Therefore, we calculate the middle index for the space.
+
+                Next, we slice the phone number from O to the middle - 1.
+
+Big O:          The Big O time complexity is O(1).
+
+                This function has a time complexity of O(len(p)), where p is the number of characters in the phone
+                number, i.e. string length. If the worst case is 14 characters in a phone number, then O(len(p)) = O(14) = O(1).
+                Another way to look at it is: the function's time complexity is based upon the input, which is 1 input
+                with a string length of 14.
+
+```
+def get_mobile_prefix(phone_number):
+    middle_index = len(phone_number) // 2               O(p) len + O(1) math
+    return phone_number[:middle_index]                  O(p / 2) slice
+```
+
+T1  = [O(p) + O(1)] + O(p/2)
+    = O(p) + c1 + O(p/2)
+    = O(p) + O(p/2) <- drop the constants
+    = O(p)
+
+N   = O(len(p))
+    = O(14) <- worst case
+    = O(1)
+
+
+
+
+============================
+# Task 4
+============================
+
+Objectives in this task are to:
+
+1. Get all of the phone numbers that are doing telephone marketing.
+2. Print out a message.
+3. Print out each distinct phone number, one per line, and in lexicographic order.
+
+Given:
+
+Possible telemarketer phone numbers are ones that make outgoing calls but never have these 3 conditions:
+
+1. Send texts
+2. Receive texts
+3. Receive incoming calls
+
+That means a telemarketer phone number will only appear in index 0 of the `calls` list.  It will not be in the `texts`
+list (not at index 0 or index 1) nor in index 1 of the `calls` list.
+
+
+## Design Explanation
+
+1.  All code is executed from the `main()` program.
+
+2.  I split handling the calls and texts records into 2 separate functions. Why? Separate functions improves readability
+    and provides for isolated testing.
+
+3.  To simplify, I created a global container called `telemarketer`.  This container is a set data structure.
+
+4.  The code works with sets, as this data structure is more efficient for searching than lists and it handles
+    excluding duplicates for us.
+
+5.  Get possible telemarketers from the calls records:  This function adds each distinct "call from" phone number
+    that does not exist in the "call to" records.  That means we need to first collect all of the "call to" phone
+    numbers, i.e. build a set of phone numbers from index 1 of each call record.  Now we have a complete set of
+    phone numbers that should not be included in the telemarketer numbers.
+
+    Next, iterate again through all of the call records. Check if each "call from" (index 0) exists in the "call to"
+    set.  If no, add it to the telemarketers set.
+
+6.  Remove all of the texts' phone numbers from the possible telemarketers set:  Iterate through all of the texts' records.
+    For each record, check if "call from" (index 0) phone number exists in telemarketers. If yes, remove it. Repeat for
+    the "call to" (index 1) phone number.
+
+7.  Next, the distinct possible telemarketers phone numbers are converted into a list and then sorted.  In doing so,
+    they are sorted in lexicographic order using the built-in `.sort()` method.
+
+    As we haven't come to the optimization part of the nanodegree yet, I chose to use the builtin `sort()` function, knowing
+    this function is O(n log n).  I assume in later projects we'll get to optimize sorting.
+
+
+## Time Complexity Summary
+
+The Big O time complexity for Task 0 is O(n log n), which is due to the sort.
+
+Worst case:
+
+* All phone numbers are unique.
+* No phone number reappears in any of the records.  Worst cast: the length of the telemarketers list is the len(calls).
+
+| N          | Function                                      |
+|------------|-----------------------------------------------|
+| O(n)       | get_telemarketers_from_calls                  |
+| O(n)       | remove_texts_phone_numbers_from_telemarketers |
+| O(n log n) | main                                          |
+
+
+## Optimization
+
+This task can be reduced to a linear time complexity if the sorting algorithm is implemented as a MSD radix sort or
+a burstsort using a Trie data structure.
+
+
+## Analysis
+
+
+### `main()`
+
+Description:    This function is the main controller for the task.  It gets the area codes and mobile prefixes from calls
+                made from Bangalore by invoking the 2 primary functions.  Then it sorts the codes and prints each out
+                to complete Task A. Then it calculates the percentage of calls and prints it out to complete Task B.
+
+Big O:          The Big O time complexity is O(n log n), which is due to the sort.
+
+```
+def main():
+    get_telemarketers_from_calls()                                                  O(n)
+    remove_texts_phone_numbers_from_telemarketers()                                 O(n)
+
+    # Sort the distinct phone numbers in lexicographic order.
+    telemarketers = list(telemarketers)                                             O(n)
+    telemarketers.sort()  # O(n log n) sort. Ouch!                                  O(n log n)
+
+    print("These numbers could be telemarketers: ")                                 O(1)
+    for phone_number in telemarketers:                                              O(n)
+        print(phone_number)                                                             O(1)
+```
+
+T1  = [O(n) + O(n)] + [O(n) + O(n log n)] + [O(1) + n x O(1)]
+    = c1 + O(n) + O(n log n) + c3 + n x c4
+    = O(2n) + O(n log n) <- drop the constants
+    = O(n log n) <- pick the worst case
+
+N   = O(n log n)
+
+
+### `get_telemarketers_from_calls()`
+
+Description:    Add each "call from" telephone number that does not appear in the "calls to" set of phone numbers.
+
+                1. Build the set of "call to" phone numbers from the `calls` list.
+                2. Iterate through the calls list again.
+                3. Check if each "call from" phone number exists in the "calls to" set.
+                4. If no, add it to the possible telemarketers set.
+
+Big O:          The Big O time complexity is O(n).
+
+```
+def get_telemarketers_from_calls():
+    calls_to = set()                                                                O(1)
+
+    # Build separate sets for "calls from" and "calls to" lists.
+    for record in calls:                                                            O(n)
+        calls_to.add(record[1])                                                         O(1) add + O(1) get
+
+    for record in calls:                                                            O(n)
+        call_from = record[0]                                                           O(1)
+        if call_from not in calls_to:                                                   O(1)
+            telemarketers.add(call_from)                                                O(1)
+```
+
+T1  = [O(1)] + [n x [ O(1) + O(1) ] ] + [n x [ O(n) + O(n) + O(n) ] ]
+    = c1 + [n x c2] + [n x c3]
+    = n + n <- drop the constants
+    = 2n
+    = n
+
+N   = O(n)
+
+
+### `remove_texts_from_telemarketers()`
+
+Description:    Remove each texts phone number that exists in the telemarketers set.
+
+                1. Iterate through all the records in the `texts` list.
+                2. Check if each phone number exists in the telemarketer set.
+                4. If yes, remove it.
+
+Big O:          The Big O time complexity is O(n).
+
+```
+def remove_texts_from_telemarketers():
+    for record in texts:                                                        O(n)
+        for i in range(2):                                                          O(2)
+            phone_number = record[i]                                                O(1)
+            if phone_number in telemarketers:                                       O(1)
+                telemarketers.remove(phone_number)                                  O(1)
+```
+
+T1  = n x [ O(2) + O(1) + O(1) + O(1) ]
+    = n x c1
+    = n <- drop the constants
+
+N   = O(n)
