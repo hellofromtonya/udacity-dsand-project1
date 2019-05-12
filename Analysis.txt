@@ -770,9 +770,9 @@ a burstsort using a Trie data structure.
 
 ### `main()`
 
-Description:    This function is the main controller for the task.  It gets the area codes and mobile prefixes from calls
-                made from Bangalore by invoking the 2 primary functions.  Then it sorts the codes and prints each out
-                to complete Task A. Then it calculates the percentage of calls and prints it out to complete Task B.
+Description:    This function is the main controller for the task.  It gets the possible telemarketer phone numbers
+                from the `calls` list.  Then removes each `texts` phone number.  Then it sorts the list of possible
+                telemarketer phone numbers, prints a message, and prints each number.
 
 Big O:          The Big O time complexity is O(n log n), which is due to the sort.
 
