@@ -199,8 +199,11 @@ def get_codes(calls_made):
 
         # If fixed, get area code.
         elif is_fixed_line(phone_number):
-            calls_to_bangalore += 1
             codes.add(get_area_code(phone_number))
+
+            # If it's a call to a Bangalore phone number, increment the count.
+            if is_bangalore(phone_number):
+                calls_to_bangalore += 1
 
     return list(codes)
 
@@ -275,7 +278,8 @@ def run_tests():
         assert(not is_telemarketer(phone_number))
         assert(get_mobile_prefix(phone_number) == prefix)
 
-
+    number_of_calls_made = 0
+    calls_to_bangalore = 0
     test_data = [
         [
             ['(080)67362492', '1408371942', '01-09-2016 06:19:28', '2751'],
@@ -310,12 +314,19 @@ def run_tests():
     ]
     calls_made = get_calls_made_from_bangalore(test_data[0])
     assert(calls_made == expected)
+
     # Test the codes.
     codes = get_codes(calls_made)
     expected = ['140', '080', '74066', '90365', '04344']
     assert(codes.sort() == expected.sort())
 
+    # Test the tracking counts.
+    assert(number_of_calls_made == 5)
+    assert(calls_to_bangalore == 1)
+
     # Test for no duplicates.
+    number_of_calls_made = 0
+    calls_to_bangalore = 0
     expected = [
         '1408371942',
         '(080)43901222',
@@ -335,7 +346,13 @@ def run_tests():
     expected = ['140', '080', '90365', '04344']
     assert(codes.sort() == expected.sort())
 
+    # Test the tracking counts.
+    assert(number_of_calls_made == 8)
+    assert(calls_to_bangalore == 2)
+
+
     print('All tests passed!')
+
 
     # Clean up.
     number_of_calls_made = 0

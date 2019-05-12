@@ -467,13 +467,16 @@ def get_codes(calls_made):
 
         # If fixed, get area code.
         elif is_fixed_line(phone_number):                                       O(1) is_fixed_line
-            calls_to_bangalore += 1                                                 O(1)
             codes.add(get_area_code(phone_number))                                  O(1) get_area_code + O(1) add
+
+            # If it's a call to a Bangalore phone number, increment the count.
+            if is_bangalore(phone_number):                                          O(1)
+                calls_to_bangalore += 1                                             O(1)
 
     return list(codes)                                                      O(n)
 ```
 
-T1  = [O(1) + O(1) + O(1)] + n x [ [O(1) + O(1)] + [O(1)] + [O(1) + O(1) + O(1) + O(1)] ]
+T1  = [O(1) + O(1) + O(1)] + n x [ [O(1) + O(1)] + [O(1)] + [O(1) + O(1) + O(1) + O(1) + O(1)] ]
     = c1 + n x [ c2 + c3 + c4 ]
     = c1 + n x c5
     = n <- drop the constants
